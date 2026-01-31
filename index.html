@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scale=no">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🏸 Badminton Cost Splitter</title>
+    <link rel="manifest" href="data:application/json,{%22name%22:%22Badminton%20Cost%20Splitter%22,%22short_name%22:%22BadmintonSplit%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22theme_color%22:%22%234f46e5%22,%22background_color%22:%22%23f3f4f6%22}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 16px;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            padding: 20px 0;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #4f46e5;
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .week-container {
+            border: 2px dashed #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #fafafa;
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .week-header h3 {
+            color: #374151;
+            font-size: 1rem;
+        }
+
+        .week-header .delete-week {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .player-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .player-tag {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .player-tag .remove {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+
+        .player-tag .remove:hover {
+            opacity: 1;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            width: 100%;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .add-player-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-player-row input {
+            flex: 1;
+        }
+
+        .add-player-row button {
+            padding: 12px 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .player-result {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .player-result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .player-result-header h4 {
+            color: #1f2937;
+            font-size: 1.1rem;
+        }
+
+        .player-result-header .total {
+            background: #4f46e5;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .player-breakdown {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .player-breakdown div {
+            padding: 4px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .share-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-box .label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .quick-add {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-add-btn {
+            background: #fef3c7;
+            color: #92400e;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .quick-add-btn:hover {
+            background: #fde68a;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Currency selector */
+        .currency-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .currency-btn {
+            padding: 8px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .currency-btn.active {
+            border-color: #4f46e5;
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        /* History */
+        .history-item {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item .date {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .history-item .amount {
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        @media (max-width: 380px) {
+            .stat-box .number {
+                font-size: 1.2rem;
+            }
+            .stat-box .label {
+                font-size: 0.65rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏸 Badminton Splitter</h1>
+            <p>Split court costs fairly among players</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('input')">📝 Input</button>
+            <button class="tab" onclick="showTab('results')">💰 Results</button>
+            <button class="tab" onclick="showTab('history')">📜 History</button>
+        </div>
+
+        <!-- INPUT TAB -->
+        <div id="input-tab" class="tab-content active">
+            <div class="card">
+                <h2>💱 Currency</h2>
+                <div class="currency-selector">
+                    <button class="currency-btn active" onclick="setCurrency('$', this)">$ USD</button>
+                    <button class="currency-btn" onclick="setCurrency('£', this)">£ GBP</button>
+                    <button class="currency-btn" onclick="setCurrency('€', this)">€ EUR</button>
+                    <button class="currency-btn" onclick="setCurrency('₹', this)">₹ INR</button>
+                    <button class="currency-btn" onclick="setCurrency('RM', this)">RM MYR</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📅 Weekly Sessions</h2>
+                <div id="weeks-container">
+                    <!-- Weeks will be added here dynamically -->
+                </div>
+                <button class="btn btn-secondary" onclick="addWeek()">
+                    ➕ Add Week
+                </button>
+            </div>
+
+            <div class="card">
+                <h2>⭐ Quick Add Players</h2>
+                <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;">
+                    Players you've added before will appear here for quick access.
+                </p>
+                <div id="quick-add-players" class="quick-add">
+                    <!-- Quick add buttons will appear here -->
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="calculateCosts()">
+                🧮 Calculate Costs
+            </button>
+        </div>
+
+        <!-- RESULTS TAB -->
+        <div id="results-tab" class="tab-content">
+            <div class="results-section show">
+                <div class="card">
+                    <h2>📊 Summary</h2>
+                    <div class="summary-stats" id="summary-stats">
+                        <div class="stat-box">
+                            <div class="number" id="total-cost">$0</div>
+                            <div class="label">Total Cost</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="number" id="total-players">0</div>
+                            <div class="label">Players</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="number" id="total-weeks">0</div>
+                            <div class="label">Weeks</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>👥 Individual Amounts</h2>
+                    <div id="results-container">
+                        <div class="empty-state">
+                            <div class="icon">📊</div>
+                            <p>Add weeks and players, then calculate to see results</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="shareAllResults()">
+                    📤 Share All Results
+                </button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="history-tab" class="tab-content">
+            <div class="card">
+                <h2>📜 Calculation History</h2>
+                <div id="history-container">
+                    <div class="empty-state">
+                        <div class="icon">📜</div>
+                        <p>Your calculation history will appear here</p>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="clearHistory()" style="margin-top: 12px;">
+                    🗑️ Clear History
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Message copied!</div>
+
+    <script>
+        let weekCounter = 0;
+        let currency = '$';
+        let allPlayers = new Set();
+        let calculationResults = null;
+
+        // Load saved data on startup
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedPlayers();
+            loadHistory();
+            addWeek(); // Start with one week
+        });
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        function setCurrency(curr, btn) {
+            currency = curr;
+            document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (calculationResults) {
+                displayResults(calculationResults);
+            }
+        }
+
+        function addWeek() {
+            weekCounter++;
+            const container = document.getElementById('weeks-container');
+            
+            const weekDiv = document.createElement('div');
+            weekDiv.className = 'week-container';
+            weekDiv.id = `week-${weekCounter}`;
+            weekDiv.innerHTML = `
+                <div class="week-header">
+                    <h3>Week ${weekCounter}</h3>
+                    <button class="delete-week" onclick="deleteWeek(${weekCounter})">🗑️ Remove</button>
+                </div>
+                <div class="input-group">
+                    <label>Court Cost</label>
+                    <input type="number" id="cost-${weekCounter}" placeholder="Enter cost..." inputmode="decimal">
+                </div>
+                <div class="input-group">
+                    <label>Players (press Enter or + to add)</label>
+                    <div class="add-player-row">
+                        <input type="text" id="player-input-${weekCounter}" placeholder="Enter player name..." 
+                               onkeypress="handlePlayerInput(event, ${weekCounter})">
+                        <button onclick="addPlayer(${weekCounter})">+</button>
+                    </div>
+                    <div class="player-tags" id="players-${weekCounter}"></div>
+                </div>
+            `;
+            
+            container.appendChild(weekDiv);
+        }
+
+        function deleteWeek(weekNum) {
+            const weekDiv = document.getElementById(`week-${weekNum}`);
+            if (weekDiv) {
+                weekDiv.remove();
+            }
+        }
+
+        function handlePlayerInput(event, weekNum) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addPlayer(weekNum);
+            }
+        }
+
+        function addPlayer(weekNum, playerName = null) {
+            const input = document.getElementById(`player-input-${weekNum}`);
+            const name = playerName || input.value.trim();
+            
+            if (!name) return;
+            
+            const container = document.getElementById(`players-${weekNum}`);
+            
+            // Check if player already exists in this week
+            const existingTags = container.querySelectorAll('.player-tag');
+            for (let tag of existingTags) {
+                if (tag.dataset.name.toLowerCase() === name.toLowerCase()) {
+                    showToast('Player already added to this week!');
+                    input.value = '';
+                    return;
+                }
+            }
+            
+            const tag = document.createElement('span');
+            tag.className = 'player-tag';
+            tag.dataset.name = name;
+            tag.innerHTML = `${name} <span class="remove" onclick="this.parentElement.remove()">×</span>`;
+            container.appendChild(tag);
+            
+            // Add to all players set and save
+            allPlayers.add(name);
+            savePlayers();
+            updateQuickAdd();
+            
+            input.value = '';
+            input.focus();
+        }
+
+        function updateQuickAdd() {
+            const container = document.getElementById('quick-add-players');
+            container.innerHTML = '';
+            
+            allPlayers.forEach(player => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-add-btn';
+                btn.textContent = player;
+                btn.onclick = () => addPlayerToCurrentWeek(player);
+                container.appendChild(btn);
+            });
+        }
+
+        function addPlayerToCurrentWeek(playerName) {
+            // Find the last week container
+            const weeks = document.querySelectorAll('.week-container');
+            if (weeks.length > 0) {
+                const lastWeek = weeks[weeks.length - 1];
+                const weekNum = lastWeek.id.split('-')[1];
+                addPlayer(parseInt(weekNum), playerName);
+            }
+        }
+
+        function savePlayers() {
+            localStorage.setItem('badminton-players', JSON.stringify([...allPlayers]));
+        }
+
+        function loadSavedPlayers() {
+            const saved = localStorage.getItem('badminton-players');
+            if (saved) {
+                allPlayers = new Set(JSON.parse(saved));
+                updateQuickAdd();
+            }
+        }
+
+        function calculateCosts() {
+            const weeks = [];
+            const weekContainers = document.querySelectorAll('.week-container');
+            
+            weekContainers.forEach((container, index) => {
+                const weekNum = container.id.split('-')[1];
+                const cost = parseFloat(document.getElementById(`cost-${weekNum}`).value) || 0;
+                const playerTags = container.querySelectorAll(`#players-${weekNum} .player-tag`);
+                const players = Array.from(playerTags).map(tag => tag.dataset.name);
+                
+                if (cost > 0 && players.length > 0) {
+                    weeks.push({
+                        weekNum: index + 1,
+                        cost: cost,
+                        players: players,
+                        perPlayer: cost / players.length
+                    });
+                }
+            });
+
+            if (weeks.length === 0) {
+                showToast('Please add at least one week with cost and players');
+                return;
+            }
+
+            // Calculate totals per player
+            const playerTotals = {};
+            
+            weeks.forEach(week => {
+                week.players.forEach(player => {
+                    if (!playerTotals[player]) {
+                        playerTotals[player] = {
+                            name: player,
+                            total: 0,
+                            breakdown: []
+                        };
+                    }
+                    playerTotals[player].total += week.perPlayer;
+                    playerTotals[player].breakdown.push({
+                        week: week.weekNum,
+                        cost: week.cost,
+                        players: week.players.length,
+                        amount: week.perPlayer
+                    });
+                });
+            });
+
+            calculationResults = {
+                weeks: weeks,
+                playerTotals: playerTotals,
+                totalCost: weeks.reduce((sum, w) => sum + w.cost, 0),
+                totalPlayers: Object.keys(playerTotals).length,
+                totalWeeks: weeks.length
+            };
+
+            displayResults(calculationResults);
+            saveToHistory(calculationResults);
+            showTab('results');
+            document.querySelectorAll('.tab')[1].click();
+        }
+
+        function displayResults(results) {
+            // Update summary
+            document.getElementById('total-cost').textContent = `${currency}${results.totalCost.toFixed(2)}`;
+            document.getElementById('total-players').textContent = results.totalPlayers;
+            document.getElementById('total-weeks').textContent = results.totalWeeks;
+
+            // Display individual results
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+
+            // Sort players by amount owed (descending)
+            const sortedPlayers = Object.values(results.playerTotals)
+                .sort((a, b) => b.total - a.total);
+
+            sortedPlayers.forEach(player => {
+                const div = document.createElement('div');
+                div.className = 'player-result';
+                
+                let breakdownHTML = player.breakdown.map(b => 
+                    `<div><span>Week ${b.week} (${b.players} players × ${currency}${b.cost.toFixed(2)})</span><span>${currency}${b.amount.toFixed(2)}</span></div>`
+                ).join('');
+
+                div.innerHTML = `
+                    <div class="player-result-header">
+                        <h4>${player.name}</h4>
+                        <span class="total">${currency}${player.total.toFixed(2)}</span>
+                    </div>
+                    <div class="player-breakdown">
+                        ${breakdownHTML}
+                    </div>
+                    <button class="share-btn" onclick="sharePlayerResult('${player.name}')">
+                        📱 Share Message
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function generatePlayerMessage(player) {
+            const data = calculationResults.playerTotals[player];
+            let message = `🏸 Badminton Cost Share 🏸\n\n`;
+            message += `Hi ${player}! 👋\n\n`;
+            message += `Your total for this month: ${currency}${data.total.toFixed(2)}\n\n`;
+            message += `📋 Breakdown:\n`;
+            
+            data.breakdown.forEach(b => {
+                message += `• Week ${b.week}: ${currency}${b.amount.toFixed(2)} (${b.players} players shared ${currency}${b.cost.toFixed(2)})\n`;
+            });
+            
+            message += `\nThanks for playing! See you on the court! 🏸`;
+            
+            return message;
+        }
+
+        function sharePlayerResult(playerName) {
+            const message = generatePlayerMessage(playerName);
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Badminton Cost Share',
+                    text: message
+                }).catch(err => {
+                    copyToClipboard(message);
+                });
+            } else {
+                copyToClipboard(message);
+            }
+        }
+
+        function shareAllResults() {
+            if (!calculationResults) return;
+            
+            let message = `🏸 Badminton Cost Share - Summary 🏸\n\n`;
+            message += `📊 Total Court Cost: ${currency}${calculationResults.totalCost.toFixed(2)}\n`;
+            message += `👥 Players: ${calculationResults.totalPlayers}\n`;
+            message += `📅 Weeks: ${calculationResults.totalWeeks}\n\n`;
+            message += `💰 Individual Amounts:\n`;
+            
+            Object.values(calculationResults.playerTotals)
+                .sort((a, b) => b.total - a.total)
+                .forEach(player => {
+                    message += `• ${player.name}: ${currency}${player.total.toFixed(2)}\n`;
+                });
+            
+            message += `\nThanks everyone! See you on the court! 🏸`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Badminton Cost Share',
+                    text: message
+                }).catch(err => {
+                    copyToClipboard(message);
+                });
+            } else {
+                copyToClipboard(message);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Message copied to clipboard!');
+            }).catch(err => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('Message copied to clipboard!');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function saveToHistory(results) {
+            const history = JSON.parse(localStorage.getItem('badminton-history') || '[]');
+            history.unshift({
+                date: new Date().toLocaleDateString(),
+                time: new Date().toLocaleTimeString(),
+                totalCost: results.totalCost,
+                players: results.totalPlayers,
+                weeks: results.totalWeeks,
+                data: results
+            });
+            // Keep only last 10 calculations
+            if (history.length > 10) history.pop();
+            localStorage.setItem('badminton-history', JSON.stringify(history));
+            loadHistory();
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('badminton-history') || '[]');
+            const container = document.getElementById('history-container');
+            
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📜</div>
+                        <p>Your calculation history will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = history.map((item, index) => `
+                <div class="history-item" onclick="loadFromHistory(${index})">
+                    <div>
+                        <div><strong>${item.date}</strong> at ${item.time}</div>
+                        <div class="date">${item.weeks} weeks, ${item.players} players</div>
+                    </div>
+                    <div class="amount">${currency}${item.totalCost.toFixed(2)}</div>
+                </div>
+            `).join('');
+        }
+
+        function loadFromHistory(index) {
+            const history = JSON.parse(localStorage.getItem('badminton-history') || '[]');
+            if (history[index]) {
+                calculationResults = history[index].data;
+                displayResults(calculationResults);
+                showTab('results');
+                document.querySelectorAll('.tab')[1].click();
+            }
+        }
+
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all history?')) {
+                localStorage.removeItem('badminton-history');
+                loadHistory();
+                showToast('History cleared!');
+            }
+        }
+    </script>
+</body>
+</html>
